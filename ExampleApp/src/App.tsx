@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
@@ -7,8 +7,35 @@ import './App.css'
 function App() {
   const [count, setCount] = useState(0)
 
+  const ws = useRef(null)
+
+  useEffect(() => {
+    // connect to server
+    ws.current = new WebSocket("ws://localhost:4000");
+
+    ws.current.onopen = () => {
+      console.log("Connected to server");
+    };
+
+    ws.current.onmessage = (event) => {
+      console.log(event)
+      // setMessages((prev) => [...prev, event.data]);
+    };
+
+    ws.current.onclose = () => {
+      console.log("Disconnected");
+    };
+
+    return () => {
+      ws.current.close();
+    };
+  }, [])
+
   return (
     <>
+      <button onClick={()=>{
+        ws.current.send("HELLO FROM ANOTHER WORLD, I COME IN PEACE")
+      }}>Send Message</button>
       <section id="center">
         <div className="hero">
           <img src={heroImg} className="base" width="170" height="179" alt="" />
