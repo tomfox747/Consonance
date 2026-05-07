@@ -15,9 +15,10 @@ function App() {
 
 const C = () => {
 
-  const co = useConsonanceObserver('C2')
   const [count, setCount] = useState(0)
-
+  
+  const co = useConsonanceObserver('C2',{count:count})
+  
   return <Profiler {...co}><C2 count={count} setCount={setCount}/></Profiler>
 }
 

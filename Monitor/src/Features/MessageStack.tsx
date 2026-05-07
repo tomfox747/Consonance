@@ -1,24 +1,77 @@
 import type { IConsonanceObserverMsg } from "../Models"
-import {
-  Box,
-  Card,
-  Grid,
-  Group,
-  Stack,
-  Text,
-  ThemeIcon
-} from "@mantine/core";
+import {Box,Button,Card,Collapse,Flex,Grid,Group,Select,Stack,Text,ThemeIcon} from "@mantine/core";
 import { IconActivity } from "@tabler/icons-react";
 import { useInViewport } from '@mantine/hooks';
+import { useDisclosure } from '@mantine/hooks';
+import { CodeHighlight } from "@mantine/code-highlight";
+import { useState } from "react";
 
-export const MessageStack = (props:{messages: IConsonanceObserverMsg[]}) => {
-    
+
+export const MessageStack = (props:{clearMessages():void,messages: IConsonanceObserverMsg[]}) => {
+
     const sorted = [...props.messages].sort(
         (a, b) => Number(b.metrics.timestamp) - Number(a.metrics.timestamp)
     );
 
-    return <Stack gap={2}>
-        {sorted.map((x, idx) => (
+    const [filters, setFilters] = useState<{byComponentId:string, orderBy:string}>({
+        byComponentId:'',
+        orderBy:''
+    })
+
+    const filterMessages = () => {
+
+        let out: IConsonanceObserverMsg[] = [...sorted]
+
+        if(filters.byComponentId.length > 0) {
+            out = out.filter(x=>x.component===filters.byComponentId)
+        }
+
+        if(filters.orderBy.length > 0) {
+            switch(filters.orderBy){
+                case 'Duration':
+                    out = out.sort((a,b) => {return Number(a.metrics.actualDuration)-Number(b.metrics.actualDuration)})
+                    break;
+                case 'Component':
+                    out = out.sort((a,b) => (a.component.localeCompare(b.component)))
+                    break;
+                case 'Renders':
+                    out = out.sort((a,b) => {return Number(a.renderCount)-Number(b.renderCount)})
+                    break;
+                case 'Phase':
+                    out = out.sort((a,b) => (a.metrics.phase.localeCompare(b.metrics.phase)))
+                    break;
+            }
+            
+        }
+
+        return out
+    }
+
+    const selects = (() => {
+        const opts: Record<string,string> = {}
+        sorted.forEach(x=>{opts[x.component]=x.component})
+        return ['All', ...Object.values(opts)]
+    })()
+
+    return <Stack gap={5} mt={5}>
+        <Flex wrap={'wrap'}>
+            <Button w={'200px'} onClick={props.clearMessages}>Clear Messages</Button>
+        </Flex>
+        <Flex wrap={'wrap'} gap={5}>
+            <Select
+                label={'Filter By Component ID'}
+                placeholder="Component ID"
+                data={selects}
+                onChange={(v)=>setFilters({...filters, byComponentId:v==='All' ? '' : v ??''})}
+            />
+            <Select
+                label={'Order By'}
+                placeholder="Order By"
+                data={['Default','Duration', 'Component', 'Renders', 'Phase']}
+                onChange={(v)=>setFilters({...filters, orderBy:v??''})}
+            />
+        </Flex>
+        {filterMessages().map((x, idx) => (
             <Message x={x} idx={idx}/>
         ))}
     </Stack>
@@ -32,11 +85,14 @@ const Message =({x, idx}: {x: IConsonanceObserverMsg, idx:number}) => {
         const d = new Date(Number(ts));
         return `${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}:${d.getMilliseconds()}`;
     };
+    
+    const [expanded, {toggle}] = useDisclosure(false)
 
     return <div ref={ref}>
         {!inViewport
             ? <div>Loading</div>
             : <Card
+                onClick={toggle}
                 key={`${x.component}-${x.metrics.timestamp}-${idx}`}
                 withBorder
                 radius="sm"
@@ -125,7 +181,9 @@ const Message =({x, idx}: {x: IConsonanceObserverMsg, idx:number}) => {
 
                     </Grid>
                     </Grid.Col>
-
+                    <Collapse expanded={expanded}>
+                        <CodeHighlight code={JSON.stringify(x.state)} expandCodeLabel="" onClick={(e)=>e.stopPropagation()}/>
+                    </Collapse>
                 </Grid>
             </Card>
         }    

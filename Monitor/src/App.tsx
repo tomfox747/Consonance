@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
-import { Landing } from './Features/Landing'
 import type { IConsonanceObserverMsg } from './Models'
 import ConsonanceDashboard from './Features/Dashboard'
 import '@mantine/core/styles.css';
@@ -44,9 +43,12 @@ function App() {
         }
     }, [])
 
+    const clearMessages = () => {
+        setMessages([])
+    }
+
     return <MantineProvider>
-        <ConsonanceDashboard messages={messages}/>
-        {/* <Landing messages={messages}/> */}
+        <ConsonanceDashboard messages={messages} clearMessages={clearMessages}/>
     </MantineProvider>
 }
 
