@@ -2,8 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import './App.css'
 import { Landing } from './Features/Landing'
 import type { IConsonanceObserverMsg } from './Models'
+import ConsonanceDashboard from './Features/Dashboard'
+import '@mantine/core/styles.css';
+import { MantineProvider } from '@mantine/core';
 
 function App() {
+
     const ws = useRef<WebSocket|null>(null)
 
     const [messages, setMessages] = useState<IConsonanceObserverMsg[]>([])
@@ -26,7 +30,7 @@ function App() {
 
             setMessages((prev) => {
                 let msgs: IConsonanceObserverMsg[] = [...prev]
-                if(msgs.length === 100) msgs = msgs.slice(0,99)
+                if(msgs.length === 500) msgs = msgs.slice(0,99)
                 return [Obj, ...msgs]
             })
         };
@@ -40,9 +44,10 @@ function App() {
         }
     }, [])
 
-    return (
-        <Landing messages={messages}/>
-    )
+    return <MantineProvider>
+        <ConsonanceDashboard messages={messages}/>
+        {/* <Landing messages={messages}/> */}
+    </MantineProvider>
 }
 
 export default App
