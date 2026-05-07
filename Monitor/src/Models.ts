@@ -1,4 +1,3 @@
-import { createContext } from "react";
 
 export interface IConsonanceObserverMsg {
     component: string,
@@ -16,7 +15,3 @@ export interface IConsonanceObserverMsg {
     state: object,
     renderCount: number
 }
-
-export const Consonance_Ctx = createContext<{sendMessage:(message:IConsonanceObserverMsg)=>void}>({
-    sendMessage:()=>{console.log('Consonance not connected')}
-})

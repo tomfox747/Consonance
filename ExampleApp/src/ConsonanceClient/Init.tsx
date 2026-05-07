@@ -1,5 +1,5 @@
 import React, { useRef, type  JSX, useEffect } from "react";
-import { Consonance_Ctx } from "./Context";
+import { Consonance_Ctx, type IConsonanceObserverMsg } from "./Context";
 
 /**
  * Component should be added at the root of an application, 
@@ -7,7 +7,7 @@ import { Consonance_Ctx } from "./Context";
  */
 export const Consonance = React.memo((props:{children:JSX.Element}) => {
     
-    const memoryRef = useRef({ max: 0, current: 0, percentUsage:0});
+    const memoryRef = useRef({ mem_max: 0, mem_current: 0, mem_percentUsage:0});
     const ws = useRef<WebSocket|null>(null)
 
     useEffect(() => {
@@ -16,21 +16,25 @@ export const Consonance = React.memo((props:{children:JSX.Element}) => {
         ws.current = new WebSocket(`ws://localhost:${4000}`);
         ws.current.onopen = () => {console.log("Consonance Connected");};
         ws.current.onmessage = (event) => {console.log(event)};
-        ws.current.onclose = (e) => {console.log("Consonance Disconnected");};
+        ws.current.onclose = () => {console.log("Consonance Disconnected");};
         
         // handle ongoing memory usage metrics
         const memInt = setInterval(()=>{
             const p:Performance = performance
-            memoryRef.current = {current: p.memory!.usedJSHeapSize, max: p.memory!.jsHeapSizeLimit, percentUsage: Number((p.memory!.usedJSHeapSize / ((p.memory!.jsHeapSizeLimit)/100)).toFixed(2))}
+            memoryRef.current = {mem_current: p.memory!.usedJSHeapSize, mem_max: p.memory!.jsHeapSizeLimit, mem_percentUsage: Number((p.memory!.usedJSHeapSize / ((p.memory!.jsHeapSizeLimit)/100)).toFixed(2))}
         }, 1000)
 
         return () => {
             ws.current?.close();
             clearInterval(memInt)
         };
+
     }, [])
 
-    const m = (message:object) => {if(ws.current) ws.current.send(JSON.stringify({...memoryRef.current,...message}))}
+    const m = (message:IConsonanceObserverMsg) => {if(ws.current) ws.current.send(JSON.stringify({
+        ...message,
+        metrics: {...memoryRef.current, ...message.metrics},
+    }))}
 
     return <Consonance_Ctx.Provider value={{sendMessage: m}}>
         {props.children}

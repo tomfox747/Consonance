@@ -32,7 +32,6 @@ const C2 = (props: {count:number, setCount(v:number):void}) => {
 const C3 = (props: {count:number, setCount(v:number):void}) => {
   const co = useConsonanceObserver('C3btn')
   return <Profiler {...co}><button onClick={()=>props.setCount(props.count+1)}>Increment</button></Profiler>
-  // return <C4 count={props.count} setCount={props.setCount}/>
 }
 
 const C4 = (props: {id:string, count:number, setCount(v:number):void}) => {
