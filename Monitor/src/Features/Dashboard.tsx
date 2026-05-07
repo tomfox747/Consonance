@@ -1,11 +1,11 @@
 import type { IConsonanceObserverMsg } from "../Models";
 import {
   AppShell, Box, Card, Container, Divider, Flex,
-  Group, Paper, Progress, Stack, Tabs, Text, Title,
+  Group, Image, Paper, Progress, Stack, Tabs, Text, Title,
 } from "@mantine/core";
 import { MessageStack } from "./MessageStack";
 import { IconChartArea, IconMessage } from "@tabler/icons-react";
-
+import Logo from '../assets/consonancelogo.jpeg'
 
 type Props = {
   messages: IConsonanceObserverMsg[],
@@ -49,6 +49,7 @@ const Hero = (props:{messages:IConsonanceObserverMsg[]}) => <Paper
   bg="dark.7"
   >
   <Flex justify="space-between" align="center">
+      <Image w={'100px'} radius={'lg'} src={Logo}/>
       <Box>
       <Title order={1}>Consonance Dashboard</Title>
 
