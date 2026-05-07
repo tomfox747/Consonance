@@ -5,10 +5,10 @@ React Optimization and monitoring tool
 Consonance feeds realtime component data to a monitoring dashboard
 
 ## How does it work?
-- Via a webworker or broadcast channel, feeds an output of data to a development server about connected components.
+- Stream data to a development server, that exposes a monitoring app
 - UI Runs in a separate browser window
 - Consonance -> Proxy server -> Client.
-- Pipe data using broadcast channel between clients
+- Pipe data using WebSocket
 
 ## Metrics
     - Component render time
