@@ -1,4 +1,4 @@
-import { Profiler, useState } from 'react'
+import { Profiler, useEffect, useRef, useState } from 'react'
 import './App.css'
 import { Consonance } from './ConsonanceClient/Init'
 import { useConsonanceObserver } from './ConsonanceClient/useConsonanceObserver'
@@ -6,11 +6,26 @@ import { useConsonanceObserver } from './ConsonanceClient/useConsonanceObserver'
 
 function App() {
 
-  return (
-    <Consonance>
-      <C/>
-    </Consonance>
-  )
+  const ref = useRef<Record<string,object>|null>(null)
+
+  useEffect(() => {
+    if(ref.current){
+      const fibKey = Object.keys(ref.current!).find(k=>k.startsWith('__reactFiber$'))
+      if(fibKey) console.log(String(ref.current[fibKey]))
+    }
+  })
+
+  return <div ref={ref}>
+    <div>
+      <button>Kick me</button>
+    </div>
+  </div>
+
+  // return (
+  //   <Consonance>
+  //     <C/>
+  //   </Consonance>
+  // )
 }
 
 const C = () => {
