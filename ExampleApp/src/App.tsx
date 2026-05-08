@@ -19,7 +19,7 @@ const C = () => {
   
   const co = useConsonanceObserver('C2',{count:count})
   
-  return <Profiler {...co}><C2 count={count} setCount={setCount}/></Profiler>
+  return <Profiler key={'prof'} {...co}><C2 count={count} setCount={setCount}/></Profiler>
 }
 
 const C2 = (props: {count:number, setCount(v:number):void}) => {

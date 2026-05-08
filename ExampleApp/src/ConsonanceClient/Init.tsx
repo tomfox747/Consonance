@@ -36,18 +36,23 @@ export const Consonance = React.memo((props:{children:JSX.Element}) => {
         metrics: {...memoryRef.current, ...message.metrics},
     }))}
 
+    const domREF = useRef(null)
+
+    console.log(JSON.stringify(domREF))
+
     return <Consonance_Ctx.Provider value={{sendMessage: m}}>
-        {props.children}
+        <div ref={domREF}>
+            {props.children}
+        </div>
     </Consonance_Ctx.Provider>
 })
 
-
 interface PerformanceMemory {
-  usedJSHeapSize: number;
-  totalJSHeapSize: number;
-  jsHeapSizeLimit: number;
+    usedJSHeapSize: number;
+    totalJSHeapSize: number;
+    jsHeapSizeLimit: number;
 }
 
 interface Performance extends globalThis.Performance {
-  memory?: PerformanceMemory;
+    memory?: PerformanceMemory;
 }
