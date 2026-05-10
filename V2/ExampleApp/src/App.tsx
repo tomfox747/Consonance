@@ -2,10 +2,6 @@ import { useState } from 'react'
 import './App.css'
 import { ConsonanceWrapper } from './Consonance/ConsonanceWrapper'
 
-// ----------------------------------------------------------------------------
-
-// ----------------------------------------------------------------------------
-
 function App() {
 
     return <Parent key={'Parent'}/>
