@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react"
+import { createContext, useContext, useEffect, useRef, useState } from "react"
 import type { IFiberNode } from "./IFibernode"
 
 export const useConsonance = (DA:string) => {
 
+    const [renderIdx,setRenderIdx] = useState(0)
     const captureRef = useRef<null|object>(null)
     const wsRef = useRef<null|WebSocket>(null)
     const [fiberNode, setFiberNode] = useState<null|IFiberNode>(null)
@@ -19,19 +20,20 @@ export const useConsonance = (DA:string) => {
             let y = Object.keys(captureRef.current).find(x=>x.startsWith('__reactFiber$'))
             setFiberNode({...captureRef.current[y]})
         }
-    },[DA])
+    },[DA,renderIdx])
 
     useEffect(() => {
         if(fiberNode && wsRef.current.readyState===1) {
             let payload: object = {}
             payload = processFiber(fiberNode, payload)
+            console.log('Processed fiber')
             wsRef.current.send(JSON.stringify(payload))
         }
 
     }, [fiberNode])
 
     const processFiber = (fiber: IFiberNode, payload: any) => {
-        
+
         const { elementType } = fiber;
         
         if(typeof elementType === 'string'){
@@ -56,8 +58,32 @@ export const useConsonance = (DA:string) => {
         return payload
     }
 
+    const fire = () => {
+        setRenderIdx(prev=>prev+1)
+    }
+
     return {
         captureRef,
-        fiberNode
+        fiberNode,
+        fire
     }
 }
+
+export interface IConsonanceSubscriberCtx {
+    fire:()=>void
+}
+
+// Currently, only a single instance of the consonance wrapper can be used
+// Future -> dynamic wrappers separated around the app will be added
+export const useConsonanceSubscriber = (depStr:unknown) => {
+
+    const _ctx = useContext(ConsonanceSubscriberCtx)
+
+    useEffect(()=>{
+        _ctx.fire()
+    }, [depStr.toString()])
+}
+
+export const ConsonanceSubscriberCtx = createContext({
+    fire:()=>{}
+})

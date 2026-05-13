@@ -22,11 +22,12 @@ interface IProcessedTreeNode {
 	elementType: string
 }
 
+// Function builds the tree, assigning an X and Y position to each component
 const processTree = (tree: IProcessedTree) => {
 	
 	const _R = (tree: IProcessedTree, y:number): IProcessedTree => {
 
-		console.log(`${y}_${_x} : ${tree.elementType}`)
+		// console.log(`${y}_${_x} : ${tree.elementType}`)
 		tree.Xpos = _x
 		tree.Ypos = y
 
@@ -46,6 +47,8 @@ const processTree = (tree: IProcessedTree) => {
 	return _R(tree,0)
 }
 
+// Function takes a processed tree with x and y values, and reformates all nodes into a flat array [].
+// The tree structure is no longer required, as the grid position is known by each node
 const flattenTree = (tree:IProcessedTree, arr: IProcessedTreeNode[]) => {
 	
 	arr.push(tree)
@@ -61,6 +64,7 @@ const flattenTree = (tree:IProcessedTree, arr: IProcessedTreeNode[]) => {
 	return arr
 }
 
+// Convert flat array of tree nodes, into a grid using the x and y co-ordinates
 const gridifyFlattenedTree = (flattenedTree: IProcessedTreeNode[]) => {
 
 	let maxX = 0;
@@ -92,6 +96,10 @@ function App() {
 
 	const [treeHistory,setTreeHistory] = useState<IProcessedTree[]>([])
 
+	const f = (processedTree: IProcessedTree) => {
+		setTreeHistory(prev=>[...prev,processedTree])
+	}
+
 	useEffect(() => {
 		wsRef.current = new WebSocket('ws://localhost:4000')
 		wsRef.current.onopen = () => {
@@ -100,8 +108,8 @@ function App() {
 
         wsRef.current.onmessage = (event) => {
             let tree = JSON.parse(event.data)
-			let processedTree: IProcessedTree = processTree(tree,0)
-			setTreeHistory((prev)=>[...prev,processedTree])
+			let processedTree: IProcessedTree = processTree(tree)
+			f(processedTree)
         };
 
         wsRef.current.onclose = () => {
@@ -122,16 +130,16 @@ function App() {
 // }
 
 const ApplicationTree = (props:{treeHistory?: IProcessedTree[]}) => {
-	if(!props.treeHistory[0]) return <div></div>
-	
-	let grid = gridifyFlattenedTree(flattenTree(props.treeHistory[0],[]))
+	if(!props.treeHistory[props.treeHistory.length-1]) return <div></div>
+
+	let grid = gridifyFlattenedTree(flattenTree(props.treeHistory[props.treeHistory.length-1],[]))
 	if(!grid) return <div></div>
 	
 	return <div style={{display:'flex', flexDirection:'column', gap:'10px', rowGap:'10px'}}>
-		{grid.map(x => {
-			return <div style={{display:'flex', gap:'10px'}}>
-				{x.map(y => {
-					return <Elem node={y}/>
+		{grid.map((x,xi) => {
+			return <div key={`row_${xi}`} style={{display:'flex', gap:'10px'}}>
+				{x.map((y,yi) => {
+					return <Elem key={`col_${yi}`} node={y}/>
 				})}
 			</div>
 		})}
